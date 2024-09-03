@@ -142,41 +142,58 @@ function update() {
 }
 
 // Game loop
+let i = 0;
 function gameLoop() {
-  update();
+  i++;
+  if(i%100 === 0 && canMoveDown()) {
+    current.row++;
+  } 
+  if(!canMoveDown()) {
+    placeTriomino();
+    current = randomShape(); // Create a new triomino
+  }  
   draw();
-  setTimeout(gameLoop, 1000); // Game speed
+  setTimeout(gameLoop, 1); // Game speed
 }
 
+let debounceTimeout;
+const debounceDelay = 100; // delay in milliseconds
+
 document.addEventListener('keydown', (e) => {
+    if (debounceTimeout) return; // if debounceTimeout exists, exit the function
     
-    const isMoveLeftPossible = 
-        e.code === 'ArrowLeft' && 
-        current.col > 0;
-    
-    const isMoveRightPossible = 
-        e.code === 'ArrowRight' && 
-        current.col < cols - current.shape[0].length;
-        
-    if ( e.code === 'ArrowUp') 
-    {
-        let newShape = rotateUp(current.shape);
-        current = Object.assign({...current, shape: newShape});
-    } 
-    if (e.code === 'ArrowDown') 
-    {
-        let newShape  = rotateDown(current.shape);
-        current = Object.assign({...current, shape: newShape});
-    } 
-    if (isMoveLeftPossible) 
-    {
-        current.col--;
-    } 
-    if (isMoveRightPossible) 
-    {
-        current.col++;
-    }
+    debounceTimeout = setTimeout(() => {
+        debounceTimeout = null; // reset the debounceTimeout after the delay
+
+        const isMoveLeftPossible = 
+            e.code === 'ArrowLeft' && 
+            current.col > 0;
+
+        const isMoveRightPossible = 
+            e.code === 'ArrowRight' && 
+            current.col < cols - current.shape[0].length;
+
+        if (e.code === 'ArrowUp') 
+        {
+            let newShape = rotateUp(current.shape);
+            current = Object.assign({...current, shape: newShape});
+        } 
+        if (e.code === 'ArrowDown') 
+        {
+            let newShape  = rotateDown(current.shape);
+            current = Object.assign({...current, shape: newShape});
+        } 
+        if (isMoveLeftPossible) 
+        {
+            current.col--;
+        } 
+        if (isMoveRightPossible) 
+        {
+            current.col++;
+        }
+    }, debounceDelay);
 });
+
 
 // Start the game
 current = randomShape();
